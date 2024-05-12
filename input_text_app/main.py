@@ -1,38 +1,35 @@
 import flet as ft
+import encrypt  # encrypt.pyファイルから関数をインポート
 
 def main(page: ft.Page):
-    input_field = ft.TextField(label="Please input sentence")
-    result_text = ft.Text("")  # 結果を表示するTextウィジェット
+    page.title = "Text Encryption App"
     
-    async def dismiss_dialog(e):
-        cupertino_alert_dialog.open = False
-        await page.update_async()
+    # 入力フィールド
+    input_field = ft.TextField(label="Enter text to encrypt", width=300)
+    
+    # 暗号化されたテキストを表示するフィールド
+    encrypted_text_area = ft.TextField(label="Encrypted Text", multiline=True, width=300, height=100)
+    
+    # 使用した鍵を表示するフィールド
+    key_text_area = ft.TextField(label="Encryption Key", multiline=True, width=300, height=100)
+    
+    # 暗号化ボタン
+    encrypt_button = ft.ElevatedButton(text="Encrypt")
+    
+    def on_encrypt_click(e):
+        # 入力されたテキストを取得し暗号化
+        plain_text = input_field.value
+        encrypted_text, key_text = encrypt.encrypt_text(plain_text)
         
-        if e.control.text == "OK":
-            # 何かの処理をここで行う（例：入力されたテキストをそのまま表示）
-            encrypted_text = "Encrypted: " + input_field.value  # ここで暗号化処理を想定
-            result_text.value = encrypted_text  # 結果のTextウィジェットを更新
-            await page.update_async()
-
-    cupertino_alert_dialog = ft.CupertinoAlertDialog(
-        title=ft.Text("暗号化を開始します"),
-        content=ft.Text("実行して良いですか？"),
-        actions=[
-            ft.CupertinoDialogAction(text="OK", is_destructive_action=True, on_click=dismiss_dialog),
-            ft.CupertinoDialogAction(text="Cancel", on_click=dismiss_dialog),
-        ],
-    )
-
-    def open_dlg(e):
-        cupertino_alert_dialog.open = True
-        page.dialog = cupertino_alert_dialog
+        # 結果をテキストフィールドに設定
+        encrypted_text_area.value = encrypted_text
+        key_text_area.value = key_text
         page.update()
 
-    # UI要素をページに追加
-    page.add(ft.SafeArea(ft.Text("Enter the sentence you want to encrypt!")))
-    page.add(input_field)
-    page.add(ft.ElevatedButton("暗号化開始！", on_click=open_dlg))
-    page.add(result_text)  # 結果を表示するTextをページに追加
+    encrypt_button.on_click = on_encrypt_click
+    
+    # ページにウィジェットを追加
+    page.add(input_field, encrypt_button, encrypted_text_area, key_text_area)
 
 if __name__ == "__main__":
     ft.app(target=main)
